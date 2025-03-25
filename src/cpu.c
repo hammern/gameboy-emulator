@@ -35,9 +35,9 @@ void cpu_reset(struct CPU *cpu)
     cpu->cycles = 0;
 }
 
-static void adc_a_r8(struct CPU *cpu, uint8_t reg)
+static void adc_a_r8(struct CPU *cpu, uint8_t *reg)
 {
-    cpu->registers.a += reg + cpu->registers.f.c;
+    cpu->registers.a += *reg + cpu->registers.f.c;
 
     cpu->registers.f.z = cpu->registers.a == 0;
     cpu->registers.f.n = 0;
@@ -72,9 +72,9 @@ static void adc_a_n8(struct CPU *cpu)
     cpu->cycles += 2;
 }
 
-static void add_a_r8(struct CPU *cpu, uint8_t reg)
+static void add_a_r8(struct CPU *cpu, uint8_t *reg)
 {
-    cpu->registers.a += reg;
+    cpu->registers.a += *reg;
 
     cpu->registers.f.z = cpu->registers.a == 0;
     cpu->registers.f.n = 0;
@@ -109,9 +109,9 @@ static void add_a_n8(struct CPU *cpu)
     cpu->cycles += 2;
 }
 
-static void add_hl_r16(struct CPU *cpu, uint16_t reg)
+static void add_hl_r16(struct CPU *cpu, uint16_t *reg)
 {
-    cpu->registers.hl += reg;
+    cpu->registers.hl += *reg;
 
     cpu->registers.f.n = 0;
     cpu->registers.f.h = 0; // TODO - Set if overflow from bit 11.
@@ -145,9 +145,9 @@ static void add_sp_e8(struct CPU *cpu)
     cpu->cycles += 4;
 }
 
-static void and_a_r8(struct CPU *cpu, uint8_t reg)
+static void and_a_r8(struct CPU *cpu, uint8_t *reg)
 {
-    cpu->registers.a &= reg;
+    cpu->registers.a &= *reg;
 
     cpu->registers.f.z = cpu->registers.a == 0;
     cpu->registers.f.n = 0;
@@ -183,7 +183,7 @@ static void and_a_n8(struct CPU *cpu)
 }
 
 // TODO
-static void bit_r8(struct CPU *cpu, uint8_t reg)
+static void bit_r8(struct CPU *cpu, uint8_t *reg)
 {
 
     cpu->registers.f.z = 0;
@@ -234,9 +234,9 @@ static void ccf(struct CPU *cpu)
     cpu->cycles += 1;
 }
 
-static void cp_a_r8(struct CPU *cpu, uint8_t reg)
+static void cp_a_r8(struct CPU *cpu, uint8_t *reg)
 {
-    int8_t result = cpu->registers.a - reg;
+    int8_t result = cpu->registers.a - *reg;
 
     cpu->registers.f.z = result == 0;
     cpu->registers.f.n = 1;
@@ -460,9 +460,9 @@ static void ld_r16_n16(struct CPU *cpu, uint16_t *reg)
     cpu->cycles += 3;
 }
 
-static void ld_hl_r8(struct CPU *cpu, uint8_t reg)
+static void ld_hl_r8(struct CPU *cpu, uint8_t *reg)
 {
-    write_byte(cpu, cpu->registers.hl, reg);
+    write_byte(cpu, cpu->registers.hl, *reg);
 
     cpu->cycles += 2;
 }
@@ -483,9 +483,9 @@ static void ld_r8_hl(struct CPU *cpu, uint8_t *reg)
     cpu->cycles += 2;
 }
 
-static void ld_r16_a(struct CPU *cpu, uint16_t reg)
+static void ld_r16_a(struct CPU *cpu, uint16_t *reg)
 {
-    write_byte(cpu, reg, cpu->registers.a);
+    write_byte(cpu, *reg, cpu->registers.a);
 
     cpu->cycles += 2;
 }
@@ -499,9 +499,9 @@ static void ld_n16_a(struct CPU *cpu)
     cpu->cycles += 4;
 }
 
-static void ld_a_r16(struct CPU *cpu, uint16_t reg)
+static void ld_a_r16(struct CPU *cpu, uint16_t *reg)
 {
-    cpu->registers.a = read_byte(cpu, reg);
+    cpu->registers.a = read_byte(cpu, *reg);
 
     cpu->cycles += 2;
 }
@@ -588,9 +588,9 @@ static void ld_sp_hl(struct CPU *cpu)
 
 static void nop(struct CPU *cpu) { cpu->cycles += 1; }
 
-static void or_a_r8(struct CPU *cpu, uint8_t reg)
+static void or_a_r8(struct CPU *cpu, uint8_t *reg)
 {
-    cpu->registers.a |= reg;
+    cpu->registers.a |= *reg;
 
     cpu->registers.f.z = cpu->registers.a == 0;
     cpu->registers.f.n = 0;
@@ -660,7 +660,7 @@ static void push_af(struct CPU *cpu)
 }
 
 // TODO
-static void push_r16(struct CPU *cpu, uint16_t reg)
+static void push_r16(struct CPU *cpu, uint16_t *reg)
 {
     // write_word();
     cpu->registers.sp -= 2;
@@ -669,7 +669,7 @@ static void push_r16(struct CPU *cpu, uint16_t reg)
 }
 
 // TODO
-static void res_u3_r8(struct CPU *cpu, uint8_t reg)
+static void res_u3_r8(struct CPU *cpu, uint8_t *reg)
 {
     // Set bit u3 in register r8 to 0. Bit 0 is the rightmost one, bit 7 the
     // leftmost one.
@@ -1038,9 +1038,9 @@ static void stop(struct CPU *cpu)
     // https://gbdev.io/pandocs/Reducing_Power_Consumption.html#using-the-stop-instruction
 }
 
-static void sub_a_r8(struct CPU *cpu, uint8_t reg)
+static void sub_a_r8(struct CPU *cpu, uint8_t *reg)
 {
-    cpu->registers.a -= reg;
+    cpu->registers.a -= *reg;
 
     cpu->registers.f.z = cpu->registers.a == 0;
     cpu->registers.f.n = 1;
@@ -1101,9 +1101,9 @@ static void swap_hl(struct CPU *cpu)
     cpu->cycles += 4;
 }
 
-static void xor_a_r8(struct CPU *cpu, uint8_t reg)
+static void xor_a_r8(struct CPU *cpu, uint8_t *reg)
 {
-    cpu->registers.a ^= reg;
+    cpu->registers.a ^= *reg;
 
     cpu->registers.f.z = cpu->registers.a == 0;
     cpu->registers.f.n = 0;
