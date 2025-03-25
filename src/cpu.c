@@ -215,9 +215,8 @@ static void call_n16(struct CPU *cpu)
 }
 
 // TODO
-static void call_cc_n16(struct CPU *cpu)
+static void call_cc_n16(struct CPU *cpu, uint8_t condition)
 {
-    uint8_t condition;
     if (condition) {
         cpu->cycles += 6;
     } else {
@@ -281,6 +280,7 @@ static void cpl(struct CPU *cpu)
     cpu->cycles += 1;
 }
 
+// TODO
 static void daa(struct CPU *cpu)
 {
     if (cpu->registers.f.n) {
@@ -307,8 +307,7 @@ static void dec_r8(struct CPU *cpu, uint8_t *reg)
 
 static void dec_hl(struct CPU *cpu)
 {
-    uint8_t value = read_byte(cpu, cpu->registers.hl);
-    value -= 1;
+    uint8_t value = read_byte(cpu, cpu->registers.hl) - 1;
     write_byte(cpu, cpu->registers.hl, value);
 
     cpu->registers.f.z = value == 0;
@@ -400,9 +399,8 @@ static void jp_n16(struct CPU *cpu)
 }
 
 // TODO
-static void jp_cc_n16(struct CPU *cpu)
+static void jp_cc_n16(struct CPU *cpu, uint8_t condition)
 {
-    uint8_t condition;
     if (condition) {
         cpu->registers.pc = read_word(cpu, cpu->registers.pc);
         cpu->cycles += 4;
@@ -419,7 +417,7 @@ static void jp_hl(struct CPU *cpu)
 }
 
 // TODO
-static void jr_n16(struct CPU *cpu)
+static void jr_n8(struct CPU *cpu)
 {
     // Relative Jump to address n16.
 
@@ -427,9 +425,8 @@ static void jr_n16(struct CPU *cpu)
 }
 
 // TODO
-static void jr_cc_n16(struct CPU *cpu)
+static void jr_cc_n8(struct CPU *cpu, uint8_t condition)
 {
-    uint8_t condition;
     if (condition) {
         cpu->cycles += 3;
     } else {
@@ -437,9 +434,9 @@ static void jr_cc_n16(struct CPU *cpu)
     }
 }
 
-static void ld_r8_r8(struct CPU *cpu, uint8_t *to, uint8_t from)
+static void ld_r8_r8(struct CPU *cpu, uint8_t *to, uint8_t *from)
 {
-    *to = from;
+    *to = *from;
 
     cpu->cycles += 1;
 }
@@ -695,9 +692,8 @@ static void ret(struct CPU *cpu)
 }
 
 // TODO
-static void ret_cc(struct CPU *cpu)
+static void ret_cc(struct CPU *cpu, uint8_t condition)
 {
-    uint8_t condition;
     if (condition) {
         cpu->cycles += 5;
     } else {
@@ -1147,6 +1143,735 @@ void cpu_execute(struct CPU *cpu)
         switch (opcode) {
         case 0x00:
             nop(cpu);
+            break;
+        case 0x01:
+            ld_r16_n16(cpu, &cpu->registers.bc);
+            break;
+        case 0x02:
+            ld_r16_a(cpu, &cpu->registers.bc);
+            break;
+        case 0x03:
+            inc_r16(cpu, &cpu->registers.bc);
+            break;
+        case 0x04:
+            inc_r8(cpu, &cpu->registers.b);
+            break;
+        case 0x05:
+            dec_r8(cpu, &cpu->registers.b);
+            break;
+        case 0x06:
+            ld_r8_n8(cpu, &cpu->registers.b);
+            break;
+        case 0x07:
+            rlca(cpu);
+            break;
+        case 0x08:
+            ld_n16_sp(cpu);
+            break;
+        case 0x09:
+            add_hl_r16(cpu, &cpu->registers.bc);
+            break;
+        case 0x0A:
+            ld_a_r16(cpu, &cpu->registers.bc);
+            break;
+        case 0x0B:
+            dec_r16(cpu, &cpu->registers.bc);
+            break;
+        case 0x0C:
+            inc_r8(cpu, &cpu->registers.c);
+            break;
+        case 0x0D:
+            dec_r8(cpu, &cpu->registers.c);
+            break;
+        case 0x0E:
+            ld_r8_n8(cpu, &cpu->registers.c);
+            break;
+        case 0x0F:
+            rrca(cpu);
+            break;
+        case 0x10:
+            stop(cpu);
+            break;
+        case 0x11:
+            ld_r16_n16(cpu, &cpu->registers.de);
+            break;
+        case 0x12:
+            ld_r16_a(cpu, &cpu->registers.de);
+            break;
+        case 0x13:
+            inc_r16(cpu, &cpu->registers.de);
+            break;
+        case 0x14:
+            inc_r8(cpu, &cpu->registers.d);
+            break;
+        case 0x15:
+            dec_r8(cpu, &cpu->registers.d);
+            break;
+        case 0x16:
+            ld_r8_n8(cpu, &cpu->registers.d);
+            break;
+        case 0x17:
+            rla(cpu);
+            break;
+        case 0x18:
+            jr_n8(cpu);
+            break;
+        case 0x19:
+            add_hl_r16(cpu, &cpu->registers.de);
+            break;
+        case 0x1A:
+            ld_a_r16(cpu, &cpu->registers.de);
+            break;
+        case 0x1B:
+            dec_r16(cpu, &cpu->registers.de);
+            break;
+        case 0x1C:
+            inc_r8(cpu, &cpu->registers.e);
+            break;
+        case 0x1D:
+            dec_r8(cpu, &cpu->registers.e);
+            break;
+        case 0x1E:
+            ld_r8_n8(cpu, &cpu->registers.e);
+            break;
+        case 0x1F:
+            rra(cpu);
+            break;
+        case 0x20:
+            jr_cc_n8(cpu, cpu->registers.f.z == 0);
+            break;
+        case 0x21:
+            ld_r16_n16(cpu, &cpu->registers.hl);
+            break;
+        case 0x22:
+            ld_r16_n16(cpu, &cpu->registers.hl);
+            break;
+        case 0x23:
+            ld_hli_a(cpu);
+            break;
+        case 0x24:
+            inc_r8(cpu, &cpu->registers.h);
+            break;
+        case 0x25:
+            dec_r8(cpu, &cpu->registers.h);
+            break;
+        case 0x26:
+            ld_r8_n8(cpu, &cpu->registers.h);
+            break;
+        case 0x27:
+            daa(cpu);
+            break;
+        case 0x28:
+            jr_cc_n8(cpu, cpu->registers.f.z == 1);
+            break;
+        case 0x29:
+            add_hl_r16(cpu, &cpu->registers.hl);
+            break;
+        case 0x2A:
+            ld_a_hli(cpu);
+            break;
+        case 0x2B:
+            dec_r16(cpu, &cpu->registers.hl);
+            break;
+        case 0x2C:
+            inc_r8(cpu, &cpu->registers.l);
+            break;
+        case 0x2D:
+            dec_r8(cpu, &cpu->registers.l);
+            break;
+        case 0x2E:
+            ld_r8_n8(cpu, &cpu->registers.l);
+            break;
+        case 0x2F:
+            cpl(cpu);
+            break;
+        case 0x30:
+            jr_cc_n8(cpu, cpu->registers.f.c == 0);
+            break;
+        case 0x31:
+            ld_sp_n16(cpu);
+            break;
+        case 0x32:
+            ld_hld_a(cpu);
+            break;
+        case 0x33:
+            inc_sp(cpu);
+            break;
+        case 0x34:
+            inc_hl(cpu);
+            break;
+        case 0x35:
+            dec_hl(cpu);
+            break;
+        case 0x36:
+            ld_hl_n8(cpu);
+            break;
+        case 0x37:
+            scf(cpu);
+            break;
+        case 0x38:
+            jr_cc_n8(cpu, cpu->registers.f.c == 1);
+            break;
+        case 0x39:
+            add_hl_sp(cpu);
+            break;
+        case 0x3A:
+            ld_a_hld(cpu);
+            break;
+        case 0x3B:
+            dec_sp(cpu);
+            break;
+        case 0x3C:
+            inc_r8(cpu, &cpu->registers.a);
+            break;
+        case 0x3D:
+            dec_r8(cpu, &cpu->registers.a);
+            break;
+        case 0x3E:
+            ld_r8_n8(cpu, &cpu->registers.a);
+            break;
+        case 0x3F:
+            ccf(cpu);
+            break;
+        case 0x40:
+            ld_r8_r8(cpu, &cpu->registers.b, &cpu->registers.b);
+            break;
+        case 0x41:
+            ld_r8_r8(cpu, &cpu->registers.b, &cpu->registers.c);
+            break;
+        case 0x42:
+            ld_r8_r8(cpu, &cpu->registers.b, &cpu->registers.d);
+            break;
+        case 0x43:
+            ld_r8_r8(cpu, &cpu->registers.b, &cpu->registers.e);
+            break;
+        case 0x44:
+            ld_r8_r8(cpu, &cpu->registers.b, &cpu->registers.h);
+            break;
+        case 0x45:
+            ld_r8_r8(cpu, &cpu->registers.b, &cpu->registers.l);
+            break;
+        case 0x46:
+            ld_r8_hl(cpu, &cpu->registers.b);
+            break;
+        case 0x47:
+            ld_r8_r8(cpu, &cpu->registers.b, &cpu->registers.a);
+            break;
+        case 0x48:
+            ld_r8_r8(cpu, &cpu->registers.c, &cpu->registers.b);
+            break;
+        case 0x49:
+            ld_r8_r8(cpu, &cpu->registers.c, &cpu->registers.c);
+            break;
+        case 0x4A:
+            ld_r8_r8(cpu, &cpu->registers.c, &cpu->registers.d);
+            break;
+        case 0x4B:
+            ld_r8_r8(cpu, &cpu->registers.c, &cpu->registers.e);
+            break;
+        case 0x4C:
+            ld_r8_r8(cpu, &cpu->registers.c, &cpu->registers.h);
+            break;
+        case 0x4D:
+            ld_r8_r8(cpu, &cpu->registers.c, &cpu->registers.l);
+            break;
+        case 0x4E:
+            ld_r8_hl(cpu, &cpu->registers.c);
+            break;
+        case 0x4F:
+            ld_r8_r8(cpu, &cpu->registers.c, &cpu->registers.a);
+            break;
+        case 0x50:
+            ld_r8_r8(cpu, &cpu->registers.d, &cpu->registers.b);
+            break;
+        case 0x51:
+            ld_r8_r8(cpu, &cpu->registers.d, &cpu->registers.c);
+            break;
+        case 0x52:
+            ld_r8_r8(cpu, &cpu->registers.d, &cpu->registers.d);
+            break;
+        case 0x53:
+            ld_r8_r8(cpu, &cpu->registers.d, &cpu->registers.e);
+            break;
+        case 0x54:
+            ld_r8_r8(cpu, &cpu->registers.d, &cpu->registers.h);
+            break;
+        case 0x55:
+            ld_r8_r8(cpu, &cpu->registers.d, &cpu->registers.l);
+            break;
+        case 0x56:
+            ld_r8_hl(cpu, &cpu->registers.d);
+            break;
+        case 0x57:
+            ld_r8_r8(cpu, &cpu->registers.d, &cpu->registers.a);
+            break;
+        case 0x58:
+            ld_r8_r8(cpu, &cpu->registers.e, &cpu->registers.b);
+            break;
+        case 0x59:
+            ld_r8_r8(cpu, &cpu->registers.e, &cpu->registers.c);
+            break;
+        case 0x5A:
+            ld_r8_r8(cpu, &cpu->registers.e, &cpu->registers.d);
+            break;
+        case 0x5B:
+            ld_r8_r8(cpu, &cpu->registers.e, &cpu->registers.e);
+            break;
+        case 0x5C:
+            ld_r8_r8(cpu, &cpu->registers.e, &cpu->registers.h);
+            break;
+        case 0x5D:
+            ld_r8_r8(cpu, &cpu->registers.e, &cpu->registers.l);
+            break;
+        case 0x5E:
+            ld_r8_hl(cpu, &cpu->registers.e);
+            break;
+        case 0x5F:
+            ld_r8_r8(cpu, &cpu->registers.e, &cpu->registers.a);
+            break;
+        case 0x60:
+            ld_r8_r8(cpu, &cpu->registers.h, &cpu->registers.b);
+            break;
+        case 0x61:
+            ld_r8_r8(cpu, &cpu->registers.h, &cpu->registers.c);
+            break;
+        case 0x62:
+            ld_r8_r8(cpu, &cpu->registers.h, &cpu->registers.d);
+            break;
+        case 0x63:
+            ld_r8_r8(cpu, &cpu->registers.h, &cpu->registers.e);
+            break;
+        case 0x64:
+            ld_r8_r8(cpu, &cpu->registers.h, &cpu->registers.h);
+            break;
+        case 0x65:
+            ld_r8_r8(cpu, &cpu->registers.h, &cpu->registers.l);
+            break;
+        case 0x66:
+            ld_r8_hl(cpu, &cpu->registers.h);
+            break;
+        case 0x67:
+            ld_r8_r8(cpu, &cpu->registers.h, &cpu->registers.a);
+            break;
+        case 0x68:
+            ld_r8_r8(cpu, &cpu->registers.l, &cpu->registers.b);
+            break;
+        case 0x69:
+            ld_r8_r8(cpu, &cpu->registers.l, &cpu->registers.c);
+            break;
+        case 0x6A:
+            ld_r8_r8(cpu, &cpu->registers.l, &cpu->registers.d);
+            break;
+        case 0x6B:
+            ld_r8_r8(cpu, &cpu->registers.l, &cpu->registers.e);
+            break;
+        case 0x6C:
+            ld_r8_r8(cpu, &cpu->registers.l, &cpu->registers.h);
+            break;
+        case 0x6D:
+            ld_r8_r8(cpu, &cpu->registers.l, &cpu->registers.l);
+            break;
+        case 0x6E:
+            ld_r8_hl(cpu, &cpu->registers.l);
+            break;
+        case 0x6F:
+            ld_r8_r8(cpu, &cpu->registers.l, &cpu->registers.a);
+            break;
+        case 0x70:
+            ld_hl_r8(cpu, &cpu->registers.b);
+            break;
+        case 0x71:
+            ld_hl_r8(cpu, &cpu->registers.c);
+            break;
+        case 0x72:
+            ld_hl_r8(cpu, &cpu->registers.d);
+            break;
+        case 0x73:
+            ld_hl_r8(cpu, &cpu->registers.e);
+            break;
+        case 0x74:
+            ld_hl_r8(cpu, &cpu->registers.h);
+            break;
+        case 0x75:
+            ld_hl_r8(cpu, &cpu->registers.l);
+            break;
+        case 0x76:
+            halt(cpu);
+            break;
+        case 0x77:
+            ld_hl_r8(cpu, &cpu->registers.a);
+            break;
+        case 0x78:
+            ld_r8_r8(cpu, &cpu->registers.a, &cpu->registers.b);
+            break;
+        case 0x79:
+            ld_r8_r8(cpu, &cpu->registers.a, &cpu->registers.c);
+            break;
+        case 0x7A:
+            ld_r8_r8(cpu, &cpu->registers.a, &cpu->registers.d);
+            break;
+        case 0x7B:
+            ld_r8_r8(cpu, &cpu->registers.a, &cpu->registers.e);
+            break;
+        case 0x7C:
+            ld_r8_r8(cpu, &cpu->registers.a, &cpu->registers.h);
+            break;
+        case 0x7D:
+            ld_r8_r8(cpu, &cpu->registers.a, &cpu->registers.l);
+            break;
+        case 0x7E:
+            ld_hl_r8(cpu, &cpu->registers.a);
+            break;
+        case 0x7F:
+            ld_r8_r8(cpu, &cpu->registers.a, &cpu->registers.a);
+            break;
+        case 0x80:
+            add_a_r8(cpu, &cpu->registers.b);
+            break;
+        case 0x81:
+            add_a_r8(cpu, &cpu->registers.c);
+            break;
+        case 0x82:
+            add_a_r8(cpu, &cpu->registers.d);
+            break;
+        case 0x83:
+            add_a_r8(cpu, &cpu->registers.e);
+            break;
+        case 0x84:
+            add_a_r8(cpu, &cpu->registers.h);
+            break;
+        case 0x85:
+            add_a_r8(cpu, &cpu->registers.l);
+            break;
+        case 0x86:
+            add_a_hl(cpu);
+            break;
+        case 0x87:
+            add_a_r8(cpu, &cpu->registers.a);
+            break;
+        case 0x88:
+            adc_a_r8(cpu, &cpu->registers.b);
+            break;
+        case 0x89:
+            adc_a_r8(cpu, &cpu->registers.c);
+            break;
+        case 0x8A:
+            adc_a_r8(cpu, &cpu->registers.d);
+            break;
+        case 0x8B:
+            adc_a_r8(cpu, &cpu->registers.e);
+            break;
+        case 0x8C:
+            adc_a_r8(cpu, &cpu->registers.h);
+            break;
+        case 0x8D:
+            adc_a_r8(cpu, &cpu->registers.l);
+            break;
+        case 0x8E:
+            adc_a_hl(cpu);
+            break;
+        case 0x8F:
+            adc_a_r8(cpu, &cpu->registers.a);
+            break;
+        case 0x90:
+            sub_a_r8(cpu, &cpu->registers.b);
+            break;
+        case 0x91:
+            sub_a_r8(cpu, &cpu->registers.c);
+            break;
+        case 0x92:
+            sub_a_r8(cpu, &cpu->registers.d);
+            break;
+        case 0x93:
+            sub_a_r8(cpu, &cpu->registers.e);
+            break;
+        case 0x94:
+            sub_a_r8(cpu, &cpu->registers.h);
+            break;
+        case 0x95:
+            sub_a_r8(cpu, &cpu->registers.l);
+            break;
+        case 0x96:
+            sub_a_hl(cpu);
+            break;
+        case 0x97:
+            sub_a_r8(cpu, &cpu->registers.a);
+            break;
+        case 0x98:
+            sbc_a_r8(cpu, &cpu->registers.b);
+            break;
+        case 0x99:
+            sbc_a_r8(cpu, &cpu->registers.c);
+            break;
+        case 0x9A:
+            sbc_a_r8(cpu, &cpu->registers.d);
+            break;
+        case 0x9B:
+            sbc_a_r8(cpu, &cpu->registers.e);
+            break;
+        case 0x9C:
+            sbc_a_r8(cpu, &cpu->registers.h);
+            break;
+        case 0x9D:
+            sbc_a_r8(cpu, &cpu->registers.l);
+            break;
+        case 0x9E:
+            sbc_a_hl(cpu);
+            break;
+        case 0x9F:
+            sbc_a_r8(cpu, &cpu->registers.a);
+            break;
+        case 0xA0:
+            and_a_r8(cpu, &cpu->registers.b);
+            break;
+        case 0xA1:
+            and_a_r8(cpu, &cpu->registers.c);
+            break;
+        case 0xA2:
+            and_a_r8(cpu, &cpu->registers.d);
+            break;
+        case 0xA3:
+            and_a_r8(cpu, &cpu->registers.e);
+            break;
+        case 0xA4:
+            and_a_r8(cpu, &cpu->registers.h);
+            break;
+        case 0xA5:
+            and_a_r8(cpu, &cpu->registers.l);
+            break;
+        case 0xA6:
+            and_a_hl(cpu);
+            break;
+        case 0xA7:
+            and_a_r8(cpu, &cpu->registers.a);
+            break;
+        case 0xA8:
+            xor_a_r8(cpu, &cpu->registers.b);
+            break;
+        case 0xA9:
+            xor_a_r8(cpu, &cpu->registers.c);
+            break;
+        case 0xAA:
+            xor_a_r8(cpu, &cpu->registers.d);
+            break;
+        case 0xAB:
+            xor_a_r8(cpu, &cpu->registers.e);
+            break;
+        case 0xAC:
+            xor_a_r8(cpu, &cpu->registers.h);
+            break;
+        case 0xAD:
+            xor_a_r8(cpu, &cpu->registers.l);
+            break;
+        case 0xAE:
+            xor_a_hl(cpu);
+            break;
+        case 0xAF:
+            xor_a_r8(cpu, &cpu->registers.a);
+            break;
+        case 0xB0:
+            or_a_r8(cpu, &cpu->registers.b);
+            break;
+        case 0xB1:
+            or_a_r8(cpu, &cpu->registers.c);
+            break;
+        case 0xB2:
+            or_a_r8(cpu, &cpu->registers.d);
+            break;
+        case 0xB3:
+            or_a_r8(cpu, &cpu->registers.e);
+            break;
+        case 0xB4:
+            or_a_r8(cpu, &cpu->registers.h);
+            break;
+        case 0xB5:
+            or_a_r8(cpu, &cpu->registers.l);
+            break;
+        case 0xB6:
+            or_a_hl(cpu);
+            break;
+        case 0xB7:
+            or_a_r8(cpu, &cpu->registers.a);
+            break;
+        case 0xB8:
+            cp_a_r8(cpu, &cpu->registers.b);
+            break;
+        case 0xB9:
+            cp_a_r8(cpu, &cpu->registers.c);
+            break;
+        case 0xBA:
+            cp_a_r8(cpu, &cpu->registers.d);
+            break;
+        case 0xBB:
+            cp_a_r8(cpu, &cpu->registers.e);
+            break;
+        case 0xBC:
+            cp_a_r8(cpu, &cpu->registers.h);
+            break;
+        case 0xBD:
+            cp_a_r8(cpu, &cpu->registers.l);
+            break;
+        case 0xBE:
+            cp_a_hl(cpu);
+            break;
+        case 0xBF:
+            cp_a_r8(cpu, &cpu->registers.a);
+            break;
+        case 0xC0:
+            ret_cc(cpu, cpu->registers.f.z == 0);
+            break;
+        case 0xC1:
+            pop_r16(cpu, &cpu->registers.bc);
+            break;
+        case 0xC2:
+            jp_cc_n16(cpu, cpu->registers.f.z == 0);
+            break;
+        case 0xC3:
+            jp_n16(cpu);
+            break;
+        case 0xC4:
+            call_cc_n16(cpu, cpu->registers.f.z == 0);
+            break;
+        case 0xC5:
+            push_r16(cpu, &cpu->registers.bc);
+            break;
+        case 0xC6:
+            add_a_n8(cpu);
+            break;
+        case 0xC7:
+            rst_vec(cpu);
+            break;
+        case 0xC8:
+            ret_cc(cpu, cpu->registers.f.z == 1);
+            break;
+        case 0xC9:
+            ret(cpu);
+            break;
+        case 0xCA:
+            jp_cc_n16(cpu, cpu->registers.f.z == 1);
+            break;
+        case 0xCC:
+            call_cc_n16(cpu, cpu->registers.f.z == 1);
+            break;
+        case 0xCD:
+            call_n16(cpu);
+            break;
+        case 0xCE:
+            adc_a_n8(cpu);
+            break;
+        case 0xCF:
+            rst_vec(cpu);
+            break;
+        case 0xD0:
+            ret_cc(cpu, cpu->registers.f.c == 0);
+            break;
+        case 0xD1:
+            pop_r16(cpu, &cpu->registers.de);
+            break;
+        case 0xD2:
+            jp_cc_n16(cpu, cpu->registers.f.c == 0);
+            break;
+        case 0xD4:
+            call_cc_n16(cpu, cpu->registers.f.c == 0);
+            break;
+        case 0xD5:
+            push_r16(cpu, &cpu->registers.de);
+            break;
+        case 0xD6:
+            sub_a_n8(cpu);
+            break;
+        case 0xD7:
+            rst_vec(cpu);
+            break;
+        case 0xD8:
+            ret_cc(cpu, cpu->registers.f.c == 1);
+            break;
+        case 0xD9:
+            reti(cpu);
+            break;
+        case 0xDA:
+            jp_cc_n16(cpu, cpu->registers.f.c == 1);
+            break;
+        case 0xDC:
+            call_cc_n16(cpu, cpu->registers.f.c == 1);
+            break;
+        case 0xDE:
+            sbc_a_n8(cpu);
+            break;
+        case 0xDF:
+            rst_vec(cpu);
+            break;
+        case 0xE0:
+            // TODO ld_n8_a(cpu);
+            break;
+        case 0xE1:
+            pop_r16(cpu, &cpu->registers.hl);
+            break;
+        case 0xE2:
+            // TODO ld_c_a(cpu);
+            break;
+        case 0xE5:
+            push_r16(cpu, &cpu->registers.hl);
+            break;
+        case 0xE6:
+            and_a_n8(cpu);
+            break;
+        case 0xE7:
+            rst_vec(cpu);
+            break;
+        case 0xE8:
+            add_sp_e8(cpu);
+            break;
+        case 0xE9:
+            jp_hl(cpu);
+            break;
+        case 0xEA:
+            ld_n16_a(cpu);
+            break;
+        case 0xEE:
+            xor_a_n8(cpu);
+            break;
+        case 0xEF:
+            rst_vec(cpu);
+            break;
+        case 0xF0:
+            // TODO ld_a_n8(cpu);
+            break;
+        case 0xF1:
+            pop_af(cpu);
+            break;
+        case 0xF2:
+            // TODO ld_a_c(cpu);
+            break;
+        case 0xF3:
+            di(cpu);
+            break;
+        case 0xF5:
+            push_af(cpu);
+            break;
+        case 0xF6:
+            or_a_n8(cpu);
+            break;
+        case 0xF7:
+            rst_vec(cpu);
+            break;
+        case 0xF8:
+            ld_hl_sp_e8(cpu);
+            break;
+        case 0xF9:
+            ld_sp_hl(cpu);
+            break;
+        case 0xFA:
+            ld_a_n16(cpu);
+            break;
+        case 0xFB:
+            ei(cpu);
+            break;
+        case 0xFE:
+            cp_a_n8(cpu);
+            break;
+        case 0xFF:
+            rst_vec(cpu);
             break;
         default:
             printf("uknown opcode 0x%02x\n", opcode);
